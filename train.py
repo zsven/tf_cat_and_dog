@@ -13,7 +13,8 @@ def train():
     train_batch = tf.cast(train_batch, dtype=tf.float32)
     label_batch = tf.cast(label_batch, dtype=tf.int64)
 
-    logits = model.inference(train_batch, label_batch)
+    keep_prob = tf.placeholder(tf.float32)
+    logits = model.inference(train_batch, keep_prob)
     loss = model.losses(logits, label_batch)
     op = model.training(loss=loss)
     accuracy = model.evaluation(logits, label_batch)
@@ -27,7 +28,7 @@ def train():
         threads = tf.train.start_queue_runner(sess=sess, coord=coord)
         try:
             for step in range(MAX_STEP):
-                _, train_loss, train_acc = sess.run([op, loss, accuracy])
+                _, train_loss, train_acc = sess.run([op, loss, accuracy], feed_dict={keep_prob: 0.75})
                 if step % 50 == 0:
                     print('Step %d, train loss = %.2f, train accuracy = %.2f' % (step, train_loss, train_acc))
                     summary_str = sess.run(summary_op)
